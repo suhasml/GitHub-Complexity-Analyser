@@ -129,9 +129,7 @@ def preprocess_jupyter_notebook(content):
     if len(preprocessed_content.split()) > 500:
         preprocessed_content = " ".join(preprocessed_content.split()[:500])
 
-    return preprocessed_content
-    
-    # return preprocessed_cells
+    return preprocessed_cells
 
 def preprocess_package_file(content):
     # Implement your preprocessing logic for package files
@@ -168,6 +166,9 @@ def preprocess_code_cell(cell):
     return cell["source"]
 
 def generate_prompt(repository, code):
+    #the models max token count is 2048, so we need to limit the token count to 2000
+    if len(code.split()) > 2000:
+        code = " ".join(code.split()[:2000])
     prompt = f"""
     Generate a code complexity score for the following code snippet:
     --------------------------------------------------
@@ -207,45 +208,7 @@ def extract_complexity_score(text):
     else:
         return None
 
-# def identify_most_complex_repository(repositories):
-#     complexity_scores = {}
 
-#     for repository in repositories:
-#         preprocessed_contents = preprocess_code(repository)
-#         if preprocessed_contents:
-#             prompts = []
-#             for content in preprocessed_contents:
-#                 prompt = generate_prompt(repository, content)
-#                 prompts.append(prompt)
-
-#             scores = analyze_code(prompts)
-#             avg_score = sum(scores) / len(scores)
-#             complexity_scores[repository["name"]] = avg_score
-
-#     most_complex_repository = max(complexity_scores, key=complexity_scores.get)
-#     return most_complex_repository
-
-# def main():
-#     st.title("Code Complexity Analyzer")
-
-#     st.write("Enter your GitHub username to analyze your repositories:")
-#     github_url = st.text_input("GitHub URL", "")
-
-#     if st.button("Analyze"):
-#         st.write("Analyzing repositories...")
-
-#         repositories = get_user_repositories(github_url)
-
-#         if repositories:
-#             most_complex_repository = identify_most_complex_repository(repositories)
-
-#             st.write("Analysis complete!")
-#             st.write(f"The most complex repository is: {most_complex_repository}")
-#         else:
-#             st.write("No repositories found.")
-
-# if __name__ == "__main__":
-#     main()
 
 def identify_most_complex_repository(repositories):
     complexity_scores = {}
