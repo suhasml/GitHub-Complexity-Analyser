@@ -122,7 +122,16 @@ def preprocess_jupyter_notebook(content):
         if cell.cell_type == "code":
             preprocessed_cells.append(preprocess_code_cell(cell))
 
-    return preprocessed_cells
+    # Flatten the preprocessed cells into a single string
+    preprocessed_content = " ".join(preprocessed_cells)
+
+    # Limit the token count to 500
+    if len(preprocessed_content.split()) > 500:
+        preprocessed_content = " ".join(preprocessed_content.split()[:500])
+
+    return preprocessed_content
+    
+    # return preprocessed_cells
 
 def preprocess_package_file(content):
     # Implement your preprocessing logic for package files
