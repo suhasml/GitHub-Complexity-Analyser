@@ -169,6 +169,7 @@ def generate_prompt(repository, code):
     #the models max token count is 2048, so we need to limit the token count to 2000
     if len(code.split()) > 2000:
         code = " ".join(code.split()[:2000])
+    
     prompt = f"""
     Generate a code complexity score for the following code snippet:
     --------------------------------------------------
