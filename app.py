@@ -129,7 +129,7 @@ def preprocess_jupyter_notebook(content):
     if len(preprocessed_content.split()) > 500:
         preprocessed_content = " ".join(preprocessed_content.split()[:500])
 
-    return preprocessed_cells
+    return preprocessed_content
 
 def preprocess_package_file(content):
     # Implement your preprocessing logic for package files
