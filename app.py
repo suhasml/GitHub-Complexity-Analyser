@@ -286,7 +286,10 @@ def generate_justification(repository):
 
 # Streamlit app
 def main():
+    st.set_page_config(page_title="Code Complexity Analyzer")
     st.title("Code Complexity Analyzer")
+    #title on the tab
+    
 
     github_url = st.text_input("Enter GitHub URL:")
     if st.button("Analyze"):
