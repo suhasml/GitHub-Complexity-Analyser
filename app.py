@@ -4,11 +4,13 @@ import nbformat
 import chardet
 import re
 import streamlit as st
+import os
+from config import api_key
 
-GITHUB_API = "h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"
+
 
 # Set up your OpenAI API credentials
-openai.api_key = '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'
+openai.api_key = api_key
 
 def get_user_repositories(github_url):
     # Extract the username from the GitHub URL
