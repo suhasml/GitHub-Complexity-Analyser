@@ -128,8 +128,8 @@ def preprocess_package_file(content):
     # Implement your preprocessing logic for package files
     # You can limit the token count or chunk the file as necessary
     # Example: Limit the token count to 1000
-    if len(content.split()) > 1000:
-        content = " ".join(content.split()[:1000])
+    if len(content.split()) > 500:
+        content = " ".join(content.split()[:500])
 
     return content
 
@@ -142,8 +142,8 @@ def preprocess_regular_file(content):
 
     try:
         decoded_content = content.decode(encoding, errors="ignore")
-        if len(decoded_content.split()) > 500:
-            decoded_content = " ".join(decoded_content.split()[:500])
+        if len(decoded_content.split()) > 200:
+            decoded_content = " ".join(decoded_content.split()[:200])
 
         return decoded_content
     except UnicodeDecodeError:
@@ -153,8 +153,8 @@ def preprocess_code_cell(cell):
     # Implement your preprocessing logic for code cells within Jupyter notebooks
     # You can limit the token count or handle large code cells as necessary
     # Example: Limit the token count to 200
-    if len(cell["source"].split()) > 200:
-        cell["source"] = " ".join(cell["source"].split()[:200])
+    if len(cell["source"].split()) > 100:
+        cell["source"] = " ".join(cell["source"].split()[:100])
 
     return cell["source"]
 
