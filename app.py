@@ -270,7 +270,7 @@ def generate_justification(repository):
     prompt = f"Justify why the repository '{repository}' is considered the most complex:"
 
     response = openai.Completion.create(
-        engine="davinci",
+        engine="babbage",
         prompt=prompt,
         max_tokens=200,
         temperature=0.7,
