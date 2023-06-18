@@ -297,7 +297,7 @@ def main():
         if repositories:
             most_complex_repository, complexity_score, justification, most_complex_repo_url = identify_most_complex_repository(repositories)
             if most_complex_repository:
-                st.success(f"The most complex repository is {most_complex_repository} with a complexity score of {complexity_score}.")
+                st.success(f"The most complex repository is {most_complex_repository}.")
                 st.markdown(f"**Repository URL**: {most_complex_repo_url}")
                 st.markdown(f"**Justification**: {justification}")
             else:
