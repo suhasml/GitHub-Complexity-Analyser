@@ -167,8 +167,8 @@ def preprocess_code_cell(cell):
 
 def generate_prompt(repository, code):
     #the models max token count is 2048, so we need to limit the token count to 2000
-    if len(code.split()) > 2000:
-        code = " ".join(code.split()[:2000])
+    # if len(code.split()) > 1000:
+    #     code = " ".join(code.split()[:1000])
     
     prompt = f"""
     Generate a code complexity score for the following code snippet:
@@ -182,21 +182,18 @@ def generate_prompt(repository, code):
 
 # Use GPT-3 to analyze the code
 def analyze_code(prompts):
-    response = openai.Completion.create(
-        engine="ada",
-        prompt=prompts,
-        max_tokens=2049,
-        temperature=0.7,
-        n=len(prompts),
-        stop=None
-    )
     complexity_scores = []
-    for choice in response.choices:
-        score = extract_complexity_score(choice.text)
-        if score is not None:
-            complexity_scores.append(score)
-        else:
-            complexity_scores.append(0)
+    for prompt in prompts:
+        response = openai.Completion.create(
+            engine="ada",
+            prompt=prompt,
+            max_tokens=100,
+            temperature=0.7,
+            n=1,
+            stop=None
+        )
+        score = extract_complexity_score(response.choices[0].text)
+        complexity_scores.append(score if score is not None else 0)
     return complexity_scores
 
 def extract_complexity_score(text):
@@ -240,6 +237,9 @@ def identify_most_complex_repository(repositories):
 
 
 def generate_justification(repository):
+    #the models max token count is 2048, so we need to limit the token count to 2000
+    if len(repository.split()) > 2000:
+        repository = " ".join(repository.split()[:2000])
     prompt = f"Justify why the repository '{repository}' is considered the most complex:"
 
     response = openai.Completion.create(
