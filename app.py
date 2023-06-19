@@ -167,8 +167,8 @@ def preprocess_code_cell(cell):
 
 def generate_prompt(repository, code):
     #the models max token count is 2048, so we need to limit the token count to 2000
-    # if len(code.split()) > 1000:
-    #     code = " ".join(code.split()[:1000])
+    if len(code.split()) > 100:
+        code = " ".join(code.split()[:100])
     
     prompt = f"""
     Generate a code complexity score for the following code snippet:
