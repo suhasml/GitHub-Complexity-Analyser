@@ -53,9 +53,7 @@ def preprocess_code(repository):
 
     preprocessed_contents = ' '.join(preprocessed_contents)
 
-    if len(preprocessed_contents.split()) > 2000:
-        preprocessed_contents = " ".join(preprocessed_contents.split()[:2000])
-
+  
     return preprocessed_contents
 
 def preprocess_files(repository):
