@@ -51,6 +51,11 @@ def preprocess_code(repository):
         elif file_type == "regular_file":
             preprocessed_contents.append(preprocess_regular_file(content))
 
+    preprocessed_contents = ' '.join(preprocessed_contents)
+
+    if len(preprocessed_contents.split()) > 2000:
+        preprocessed_contents = " ".join(preprocessed_contents.split()[:2000])
+
     return preprocessed_contents
 
 def preprocess_files(repository):
@@ -178,6 +183,9 @@ def generate_prompt(repository, code):
     --------------------------------------------------
 
     """
+
+
+
     return prompt
 
 # Use GPT-3 to analyze the code
