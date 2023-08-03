@@ -5,12 +5,13 @@ import chardet
 import re
 import streamlit as st
 import os
-from config import api_key
-
+from config import api_key, github_token
+import json
 
 
 # Set up your OpenAI API credentials
 openai.api_key = api_key
+github_token = github_token
 
 def get_user_repositories(github_url):
     # Extract the username from the GitHub URL
@@ -45,19 +46,28 @@ def preprocess_code(repository):
         file_type = file["type"]
         content = file["content"]
         if file_type == "jupyter_notebook":
-            preprocessed_contents.append(preprocess_jupyter_notebook(content))
+            preprocessed_contents.extend(preprocess_jupyter_notebook(content))
         elif file_type == "package_file":
-            preprocessed_contents.append(preprocess_package_file(content))
+            preprocessed_contents.extend(preprocess_package_file(content))
         elif file_type == "regular_file":
-            preprocessed_contents.append(preprocess_regular_file(content))
+            preprocessed_contents.extend(preprocess_regular_file(content))
 
-    preprocessed_contents = ' '.join(preprocessed_contents)
+    #convert preprocessed_contents to a string
+    preprocessed_contents = [str(content) for content in preprocessed_contents]
 
-  
-    return preprocessed_contents
+    # Combine preprocessed contents into a single string
+    preprocessed_content = " ".join(preprocessed_contents)
+
+    # Limit the token count to 2000
+    if len(preprocessed_content.split()) > 2000:
+        preprocessed_content = " ".join(preprocessed_content.split()[:2000])
+
+    return preprocessed_content
+
 
 def preprocess_files(repository):
-    files = fetch_repository_files(repository)
+    repository_url = repository["url"]
+    files = fetch_repository_files(repository_url, github_token)
     contents = []
     for file in files:
         file_path = file["name"]
@@ -66,19 +76,27 @@ def preprocess_files(repository):
 
     return contents
 
-def fetch_repository_files(repository):
-    url = f"https://api.github.com/repos/{username}/{repository['name']}/contents"
-    headers = {"Accept": "application/vnd.github.v3+json"}
-    response = requests.get(url, headers=headers, timeout=10)
+def fetch_repository_files(repo_url, github_token):
+    # Construct the API endpoint to fetch repository contents
+    api_url = repo_url.replace("https://github.com/", "https://api.github.com/repos/") + "/contents"
+    
+    headers = {
+        "Authorization": "token " + github_token,
+        "Accept": "application/vnd.github.v3+json"
+    }
 
+    response = requests.get(api_url, headers=headers, timeout=10)
     if response.status_code == 200:
-        files = []
-        data = response.json()
-        fetch_files_recursive(data, files)
-
-        return files
+        try:
+            data = response.json()
+            files = []
+            fetch_files_recursive(data, files)
+            return files
+        except json.JSONDecodeError as e:
+            print(f"Error: Failed to parse API response as JSON - {e}")
+            return []
     else:
-        print(f"Error: Failed to fetch files in repository {repository['name']}.")
+        print(f"Error: Failed to fetch files in the repository.")
         return []
 
 def fetch_files_recursive(data, files):
@@ -118,6 +136,22 @@ def fetch_file_content(download_url):
         print(f"Error: Failed to fetch file content from {download_url}.")
         return None
 
+# def preprocess_jupyter_notebook(content):
+#     notebook = nbformat.reads(content, nbformat.NO_CONVERT)
+#     preprocessed_cells = []
+#     for cell in notebook.cells:
+#         if cell.cell_type == "code":
+#             preprocessed_cells.append(preprocess_code_cell(cell))
+
+#     # Flatten the preprocessed cells into a single string
+#     preprocessed_content = " ".join(preprocessed_cells)
+
+#     # Limit the token count to 500
+#     if len(preprocessed_content.split()) > 500:
+#         preprocessed_content = " ".join(preprocessed_content.split()[:500])
+
+#     return preprocessed_content
+
 def preprocess_jupyter_notebook(content):
     notebook = nbformat.reads(content, nbformat.NO_CONVERT)
     preprocessed_cells = []
@@ -125,14 +159,7 @@ def preprocess_jupyter_notebook(content):
         if cell.cell_type == "code":
             preprocessed_cells.append(preprocess_code_cell(cell))
 
-    # Flatten the preprocessed cells into a single string
-    preprocessed_content = " ".join(preprocessed_cells)
-
-    # Limit the token count to 500
-    if len(preprocessed_content.split()) > 500:
-        preprocessed_content = " ".join(preprocessed_content.split()[:500])
-
-    return preprocessed_content
+    return preprocessed_cells
 
 def preprocess_package_file(content):
     # Implement your preprocessing logic for package files
@@ -141,7 +168,7 @@ def preprocess_package_file(content):
     if len(content.split()) > 500:
         content = " ".join(content.split()[:500])
 
-    return content
+    return [content]
 
 def preprocess_regular_file(content):
     result = chardet.detect(content)
@@ -155,7 +182,7 @@ def preprocess_regular_file(content):
         if len(decoded_content.split()) > 200:
             decoded_content = " ".join(decoded_content.split()[:200])
 
-        return decoded_content
+        return [decoded_content]
     except UnicodeDecodeError:
         print("Error: Failed to decode file content.")
 
@@ -181,8 +208,6 @@ def generate_prompt(repository, code):
     --------------------------------------------------
 
     """
-
-
 
     return prompt
 
@@ -281,7 +306,7 @@ def main():
                 st.markdown(f"**Justification**: {justification}")
             else:
                 st.warning("No code files found in the user's repositories.")
-        else:
+        else: 
             st.error("No repositories found for the given GitHub URL.")
 
 if __name__ == "__main__":
