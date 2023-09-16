@@ -283,11 +283,36 @@ def identify_most_complex_repository(repositories):
         return None, 0, "", None
 
 
+# def generate_justification(repository):
+#     #the models max token count is 2048, so we need to limit the token count to 2000
+#     if len(repository.split()) > 2000:
+#         repository = " ".join(repository.split()[:2000])
+#     prompt = f"Justify why the repository '{repository}' is considered the most complex:"
+
+#     response = openai.Completion.create(
+#         engine="babbage",
+#         prompt=prompt,
+#         max_tokens=200,
+#         temperature=0.7,
+#         n=1,
+#         stop=None
+#     )
+
+#     if response.choices:
+#         justification = response.choices[0].text.strip()
+#         return justification
+#     else:
+#         return ""
+
 def generate_justification(repository):
     #the models max token count is 2048, so we need to limit the token count to 2000
     if len(repository.split()) > 2000:
         repository = " ".join(repository.split()[:2000])
-    prompt = f"Justify why the repository '{repository}' is considered the most complex:"
+    Prompt = PromptTemplate.from_template(
+        """Justify why the repository '{repository}' is considered the most complex:
+        """
+    )
+    prompt = Prompt.render(repository=repository)
 
     response = openai.Completion.create(
         engine="babbage",
