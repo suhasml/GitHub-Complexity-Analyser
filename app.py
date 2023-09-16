@@ -7,6 +7,7 @@ import streamlit as st
 import os
 from config import api_key, github_token
 import json
+from langchain import PromptTemplate
 
 
 # Set up your OpenAI API credentials
@@ -162,7 +163,6 @@ def preprocess_jupyter_notebook(content):
     return preprocessed_cells
 
 def preprocess_package_file(content):
-    # Implement your preprocessing logic for package files
     # You can limit the token count or chunk the file as necessary
     # Example: Limit the token count to 1000
     if len(content.split()) > 500:
@@ -195,20 +195,36 @@ def preprocess_code_cell(cell):
 
     return cell["source"]
 
+# def generate_prompt(repository, code):
+#     #the models max token count is 2048, so we need to limit the token count to 2000
+#     if len(code.split()) > 100:
+#         code = " ".join(code.split()[:100])
+    
+#     prompt = f"""
+#     Generate a code complexity score for the following code snippet:
+#     --------------------------------------------------
+#     Code:
+#     {code}
+#     --------------------------------------------------
+
+#     """
+
+#     return prompt
+
 def generate_prompt(repository, code):
     #the models max token count is 2048, so we need to limit the token count to 2000
     if len(code.split()) > 100:
         code = " ".join(code.split()[:100])
     
-    prompt = f"""
-    Generate a code complexity score for the following code snippet:
-    --------------------------------------------------
-    Code:
-    {code}
-    --------------------------------------------------
-
-    """
-
+    Prompt = PromptTemplate.from_template(
+        """Generate a code complexity score for the following code snippet:
+        --------------------------------------------------
+        Code:
+        {code}
+        --------------------------------------------------
+        """
+    )
+    prompt = Prompt.render(code=code)
     return prompt
 
 # Use GPT-3 to analyze the code
