@@ -7,7 +7,7 @@ import streamlit as st
 import os
 from config import api_key, github_token
 import json
-from langchain import PromptTemplate
+# from langchain import PromptTemplate
 
 
 # Set up your OpenAI API credentials
